@@ -74,9 +74,13 @@ Fields:
 Create a `.env` file in the backend folder:
 
 MONGO_URL=your_mongodb_connection
+
 DB_NAME=smart_mess_db
+
 JWT_SECRET=your_secret_key
+
 BASE_URL=http://localhost:5173
+
 
 ENV=development
 
@@ -86,9 +90,13 @@ ENV=development
 ## Run Locally
 
 cd backend
+
 python -m venv venv
+
 venv\Scripts\activate
+
 pip install -r requirements.txt
+
 uvicorn server:app --reload
 
 
