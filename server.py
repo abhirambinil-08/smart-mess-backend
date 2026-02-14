@@ -81,6 +81,10 @@ class AdminLogin(BaseModel):
     email: EmailStr
     password: str
 
+class MessCreate(BaseModel):
+    name: str
+    institution: str
+
 
 # ------------------ Helpers ------------------
 
@@ -282,11 +286,47 @@ async def startup():
             logging.info("Dev admin created")
 
 
+
+# ------------------ Configuration ------------------
+
+class MessCreate(BaseModel):
+    name: str
+    institution: str
+
+
+@api_router.post("/config/mess")
+async def create_mess(data: MessCreate, user=Depends(get_current_admin)):
+
+    existing = await db.mess.find_one({"name": data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Mess already exists")
+
+    mess_obj = {
+        "id": str(uuid.uuid4()),
+        "name": data.name,
+        "institution": data.institution,
+        "created_at": datetime.now(timezone.utc)
+    }
+
+    await db.mess.insert_one(mess_obj)
+
+    return {"message": "Mess created successfully"}
+
+
+@api_router.get("/config/mess")
+async def get_mess(user=Depends(get_current_admin)):
+
+    messes = await db.mess.find().to_list(100)
+
+    for m in messes:
+        m.pop("_id", None)
+
+    return messes
 # ------------------ CORS ------------------
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "").split(","),
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
